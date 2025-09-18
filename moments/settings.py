@@ -60,6 +60,10 @@ class BaseConfig:
     WHOOSHEE_MIN_STRING_LEN = 1
     MOMENTS_SLOW_QUERY_THRESHOLD = 1
 
+    # Optional: Azure AI Vision for captions/labels
+    AZURE_VISION_ENDPOINT = os.getenv('AZURE_VISION_ENDPOINT')
+    AZURE_VISION_KEY = os.getenv('AZURE_VISION_KEY')
+
 
 class DevelopmentConfig(BaseConfig):
     SQLALCHEMY_DATABASE_URI = SQLITE_PREFIX + str(BASE_DIR / 'data-dev.db')

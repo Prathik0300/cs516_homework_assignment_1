@@ -1,65 +1,80 @@
-{% extends 'base.html' %}
-{% from 'bootstrap5/pagination.html' import render_pagination %}
-{% from 'bootstrap5/form.html' import render_form, render_field %}
-{% from 'bootstrap5/utils.html' import render_icon %}
-
-{% block title %}{{ photo.author.name }}'s Photo{% endblock %}
-
-{% block content %}
+{% extends 'base.html' %} {% from 'bootstrap5/pagination.html' import render_pagination %} {% from
+'bootstrap5/form.html' import render_form, render_field %} {% from 'bootstrap5/utils.html' import
+render_icon %} {% block title %}{{ photo.author.name }}'s Photo{% endblock %} {% block content %}
 <div class="row">
   <div class="col-lg-8">
     <div class="photo">
       <a href="{{ url_for('.get_image', filename=photo.filename) }}" target="_blank">
-        <img class="img-fluid" src="{{ url_for('.get_image', filename=photo.filename_m) }}">
+        <img
+          class="img-fluid"
+          src="{{ url_for('.get_image', filename=photo.filename_m) }}"
+          alt="{{ photo.alt_text or photo.description or 'Image' }}"
+        />
       </a>
       <span class="photo-bottom"></span>
     </div>
-    {% if current_user.is_authenticated %}
-      {% if current_user.is_collecting(photo) %}
-      <form class="inline" method="post" action="{{ url_for('main.uncollect', photo_id=photo.id) }}">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <button type="submit" class="btn btn-danger btn-sm" title="Uncollect">
-          {{ render_icon('suit-heart-fill') }}
-        </button>
-      </form>
-      {% else %}
-      <form class="inline" method="post" action="{{ url_for('main.collect', photo_id=photo.id) }}">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <button type="submit" class="btn btn-light btn-sm" title="Collect">
-          {{ render_icon('suit-heart', color='red') }}
-        </button>
-      </form>
-      {% endif %}
+    {% if current_user.is_authenticated %} {% if current_user.is_collecting(photo) %}
+    <form class="inline" method="post" action="{{ url_for('main.uncollect', photo_id=photo.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <button type="submit" class="btn btn-danger btn-sm" title="Uncollect">
+        {{ render_icon('suit-heart-fill') }}
+      </button>
+    </form>
     {% else %}
     <form class="inline" method="post" action="{{ url_for('main.collect', photo_id=photo.id) }}">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <button type="submit" class="btn btn-light btn-sm" title="Collect">
+        {{ render_icon('suit-heart', color='red') }}
+      </button>
+    </form>
+    {% endif %} {% else %}
+    <form class="inline" method="post" action="{{ url_for('main.collect', photo_id=photo.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
       <button type="submit" class="btn btn-primary btn-sm" title="Collect">
         {{ render_icon('suit-heart') }}
       </button>
     </form>
     {% endif %}
-    <a class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#share-modal" title="Share">{{ render_icon('share-fill') }}</a>
+    <a
+      class="btn btn-light btn-sm"
+      data-bs-toggle="modal"
+      data-bs-target="#share-modal"
+      title="Share"
+      >{{ render_icon('share-fill') }}</a
+    >
     {% if current_user == photo.author or current_user.can('MODERATE') %}
-    <a class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#delete-modal"
-      data-href="{{ url_for('.delete_photo', photo_id=photo.id) }}" title="Delete">{{ render_icon('trash-fill') }}</a>
-    {% endif %}
-    {% if current_user.is_authenticated and current_user != photo.author %}
+    <a
+      class="btn btn-light btn-sm"
+      data-bs-toggle="modal"
+      data-bs-target="#delete-modal"
+      data-href="{{ url_for('.delete_photo', photo_id=photo.id) }}"
+      title="Delete"
+      >{{ render_icon('trash-fill') }}</a
+    >
+    {% endif %} {% if current_user.is_authenticated and current_user != photo.author %}
     <form class="inline" method="post" action="{{ url_for('.report_photo', photo_id=photo.id) }}">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <button type="submit" class="btn btn-light btn-sm" title="Report">{{ render_icon('flag-fill') }}</button>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <button type="submit" class="btn btn-light btn-sm" title="Report">
+        {{ render_icon('flag-fill') }}
+      </button>
     </form>
     {% endif %}
     <p class="text-muted float-end small">
-      {{ render_icon('clock-fill') }} Upload at <span class="dayjs" data-format="LL">{{ photo.created_at }}</span>
+      {{ render_icon('clock-fill') }} Upload at
+      <span class="dayjs" data-format="LL">{{ photo.created_at }}</span>
     </p>
     {% include 'main/_comment.html' %}
   </div>
-  <div class="col-lg-4">
-    {% include 'main/_photo_sidebar.html' %}
-  </div>
+  <div class="col-lg-4">{% include 'main/_photo_sidebar.html' %}</div>
 </div>
 <!-- share modal -->
-<div class="modal fade" id="share-modal" tabindex="-1" role="dialog" aria-labelledby="shareModalLabel">
+<div
+  class="modal fade"
+  id="share-modal"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="shareModalLabel"
+>
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -67,15 +82,25 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body w-100">
-        <input class="form-control" value="{{ url_for('.show_photo', photo_id=photo.id, _external=True) }}" readonly>
+        <input
+          class="form-control"
+          value="{{ url_for('.show_photo', photo_id=photo.id, _external=True) }}"
+          readonly
+        />
       </div>
     </div>
   </div>
 </div>
 <!-- delete confirm modal -->
 {% if current_user.is_authenticated %}
-<div class="modal fade" id="delete-modal" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel"
-  aria-hidden="true">
+<div
+  class="modal fade"
+  id="delete-modal"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="confirmModalLabel"
+  aria-hidden="true"
+>
   <div class="modal-dialog modal-sm">
     <div class="modal-content">
       <div class="modal-header">
@@ -87,7 +112,7 @@
       </div>
       <div class="modal-footer">
         <form class="delete-form" action="" method="post">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
           <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
           <button class="btn btn-danger btn-confirm" type="submit">Delete</button>
         </form>
@@ -95,5 +120,4 @@
     </div>
   </div>
 </div>
-{% endif %}
-{% endblock %}
+{% endif %} {% endblock %}

@@ -1,60 +1,85 @@
-{% extends 'base.html' %}
-{% from 'bootstrap5/pagination.html' import render_pagination %}
-{% from 'macros.html' import photo_card with context %}
-
-{% block title %}Home{% endblock %}
-
-{% block content %}
-{% if current_user.is_authenticated %}
+{% extends 'base.html' %} {% from 'bootstrap5/pagination.html' import render_pagination %} {% from
+'macros.html' import photo_card with context %} {% block title %}Home{% endblock %} {% block content
+%} {% if current_user.is_authenticated %}
 <div class="row justify-content-md-center">
   <div class="col-lg-8">
-    {% if photos %}
-    {% for photo in photos %}
+    {% if photos %} {% for photo in photos %}
     <div class="card mb-3 bg-light">
       <div class="card-header">
         <a class="dead-link" href="{{ url_for('user.index', username=photo.author.username) }}">
-          <img class="rounded img-fluid avatar-s profile-popover"
+          <img
+            class="rounded img-fluid avatar-s profile-popover"
             data-href="{{ url_for('ajax.get_profile', user_id=photo.author.id) }}"
-            src="{{ url_for('main.get_avatar', filename=photo.author.avatar_m) }}">
+            src="{{ url_for('main.get_avatar', filename=photo.author.avatar_m) }}"
+          />
         </a>
-        <a class="profile-popover trend-card-avatar text-decoration-none"
+        <a
+          class="profile-popover trend-card-avatar text-decoration-none"
           data-href="{{ url_for('ajax.get_profile', user_id=photo.author.id) }}"
-          href="{{ url_for('user.index', username=photo.author.username) }}">{{ photo.author.name }}</a>
+          href="{{ url_for('user.index', username=photo.author.username) }}"
+          >{{ photo.author.name }}</a
+        >
         <span class="float-end">
-          <small class="dayjs-tooltip" data-bs-toggle="tooltip" data-bs-placement="top"
-            data-bs-delay="500" data-timestamp="{{ photo.created_at }}">
+          <small
+            class="dayjs-tooltip"
+            data-bs-toggle="tooltip"
+            data-bs-placement="top"
+            data-bs-delay="500"
+            data-timestamp="{{ photo.created_at }}"
+          >
             <span class="dayjs-from-now" data-format="LL">{{ photo.created_at }}</span>
           </small>
         </span>
       </div>
       <div class="card-body">
         <div class="text-center">
-          <a class="thumbnail" href="{{ url_for('.show_photo', photo_id=photo.id) }}" target="_blank">
-            <img class="img-fluid" src="{{ url_for('.get_image', filename=photo.filename_m) }}">
+          <a
+            class="thumbnail"
+            href="{{ url_for('.show_photo', photo_id=photo.id) }}"
+            target="_blank"
+          >
+            <img
+              class="img-fluid"
+              src="{{ url_for('.get_image', filename=photo.filename_m) }}"
+              alt="{{ photo.alt_text or photo.description or 'Image' }}"
+            />
           </a>
         </div>
       </div>
       <div class="card-footer">
         {{ render_icon('suit-heart-fill') }}
-        <span id="collectors-count-{{ photo.id }}"
-          data-href="{{ url_for('ajax.collectors_count', photo_id=photo.id) }}">
+        <span
+          id="collectors-count-{{ photo.id }}"
+          data-href="{{ url_for('ajax.collectors_count', photo_id=photo.id) }}"
+        >
           {{ photo.collectors_count }}
         </span>
         {{ render_icon('chat-left-fill') }} {{ photo.comments_count }}
         <div class="float-end">
           {% if current_user.is_authenticated %}
-          <button class="{% if not current_user.is_collecting(photo) %}hide{% endif %} btn btn-danger btn-sm uncollect-btn"
-            data-href="{{ url_for('ajax.uncollect', photo_id=photo.id) }}" data-id="{{ photo.id }}" title="Uncollect">
+          <button
+            class="{% if not current_user.is_collecting(photo) %}hide{% endif %} btn btn-danger btn-sm uncollect-btn"
+            data-href="{{ url_for('ajax.uncollect', photo_id=photo.id) }}"
+            data-id="{{ photo.id }}"
+            title="Uncollect"
+          >
             {{ render_icon('suit-heart-fill') }}
           </button>
           <button
             class="{% if current_user.is_collecting(photo) %}hide{% endif %} btn btn-light btn-sm collect-btn"
-            data-href="{{ url_for('ajax.collect', photo_id=photo.id) }}" data-id="{{ photo.id }}" title="Collect">
+            data-href="{{ url_for('ajax.collect', photo_id=photo.id) }}"
+            data-id="{{ photo.id }}"
+            title="Collect"
+          >
             {{ render_icon('suit-heart', color='red') }}
           </button>
           {% else %}
-          <form class="inline" method="post" action="{{ url_for('main.collect', photo_id=photo.id) }}">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <form
+            class="inline"
+            method="post"
+            action="{{ url_for('main.collect', photo_id=photo.id) }}"
+          >
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
             <button type="submit" class="btn btn-danger btn-sm">
               {{ render_icon('suit-heart') }}
             </button>
@@ -66,26 +91,20 @@
         {% endif %}
       </div>
     </div>
-    {% endfor %}
-    {% else %}
+    {% endfor %} {% else %}
     <div class="tip text-center">
       <h3>No trends.</h3>
       <p><a href="{{ url_for('.explore') }}">Explore</a></p>
     </div>
     {% endif %}
   </div>
-  <div class="col-lg-3">
-    {% include 'main/_sidebar.html' %}
-  </div>
+  <div class="col-lg-3">{% include 'main/_sidebar.html' %}</div>
 </div>
-{% if photos %}
-{{ render_pagination(pagination, align='center') }}
-{% endif %}
-{% else %}
+{% if photos %} {{ render_pagination(pagination, align='center') }} {% endif %} {% else %}
 <div class="jumbotron">
   <div class="row">
     <div class="col-md-8">
-      <img src="{{ url_for('static', filename='images/index.jpg') }}" class="rounded img-fluid">
+      <img src="{{ url_for('static', filename='images/index.jpg') }}" class="rounded img-fluid" />
     </div>
     <div class="col-md-4 align-self-center">
       <h1>Moments</h1>
@@ -94,5 +113,4 @@
     </div>
   </div>
 </div>
-{% endif %}
-{% endblock %}
+{% endif %} {% endblock %}

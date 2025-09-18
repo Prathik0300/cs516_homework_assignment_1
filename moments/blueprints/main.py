@@ -8,7 +8,7 @@ from moments.decorators import confirm_required, permission_required
 from moments.forms.main import CommentForm, DescriptionForm, TagForm
 from moments.models import Collection, Comment, Follow, Notification, Photo, Tag, User
 from moments.notifications import push_collect_notification, push_comment_notification
-from moments.utils import flash_errors, redirect_back, rename_image, resize_image, validate_image
+from moments.utils import flash_errors, redirect_back, rename_image, resize_image, validate_image, generate_caption_and_labels
 
 main_bp = Blueprint('main', __name__)
 
@@ -130,13 +130,32 @@ def upload():
         if not validate_image(f.filename):
             return 'Invalid image.', 400
         filename = rename_image(f.filename)
-        f.save(current_app.config['MOMENTS_UPLOAD_PATH'] / filename)
+        full_path = current_app.config['MOMENTS_UPLOAD_PATH'] / filename
+        f.save(full_path)
         filename_s = resize_image(f, filename, current_app.config['MOMENTS_PHOTO_SIZES']['small'])
         filename_m = resize_image(f, filename, current_app.config['MOMENTS_PHOTO_SIZES']['medium'])
+        caption, labels = generate_caption_and_labels(full_path)
         photo = Photo(
-            filename=filename, filename_s=filename_s, filename_m=filename_m, author=current_user._get_current_object()
+            filename=filename,
+            filename_s=filename_s,
+            filename_m=filename_m,
+            description=caption,
+            alt_text=caption,
+            labels=','.join(labels) if labels else None,
+            author=current_user._get_current_object(),
         )
         db.session.add(photo)
+        # create Tag records from labels and attach to photo
+        for name in labels or []:
+            label_name = (name or '').strip().lower()
+            if not label_name:
+                continue
+            tag = db.session.scalar(select(Tag).filter_by(name=label_name))
+            if tag is None:
+                tag = Tag(name=label_name)
+                db.session.add(tag)
+            if tag not in photo.tags:
+                photo.tags.append(tag)
         db.session.commit()
     return render_template('main/upload.html')
 

@@ -279,7 +279,7 @@ photo_tag = db.Table(
 )
 
 
-@whooshee.register_model('description')
+@whooshee.register_model('description', 'alt_text', 'labels')
 class Photo(db.Model):
     __tablename__ = 'photo'
 
@@ -288,6 +288,9 @@ class Photo(db.Model):
     filename: Mapped[str] = mapped_column(String(64))
     filename_s: Mapped[str] = mapped_column(String(64))
     filename_m: Mapped[str] = mapped_column(String(64))
+    # Auto alt-text and labels for accessibility and search
+    alt_text: Mapped[Optional[str]] = mapped_column(Text)
+    labels: Mapped[Optional[str]] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(default=lambda: datetime.now(timezone.utc), index=True)
     can_comment: Mapped[bool] = mapped_column(default=True)
     flag: Mapped[int] = mapped_column(default=0)
